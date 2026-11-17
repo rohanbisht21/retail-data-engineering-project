@@ -1,0 +1,111 @@
+{
+	"name": "Notebook 1",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "pocaprkpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "152b1e53-aa70-4195-9a1e-075be8608d42"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/5b715db2-c188-45dc-9975-9b9f68448909/resourceGroups/synapseudemy-rb3/providers/Microsoft.Synapse/workspaces/synapse-proj-rb-03/bigDataPools/pocaprkpool",
+				"name": "pocaprkpool",
+				"type": "Spark",
+				"endpoint": "https://synapse-proj-rb-03.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pocaprkpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.5",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql.functions import col, to_date, lower\n",
+					"df_bronze = spark.read.parquet(\"abfss://retial@retailrb.dfs.core.windows.net/Bronze/manish040596/azure-data-engineer-projects/refs/heads/main/retail_transactions_bronze.parquet\")\n",
+					"df_bronze.show()"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"\n",
+					"df_silver = (\n",
+					"    df_bronze\n",
+					"    .filter(col(\"event_type\")==\"purchase\")\n",
+					"    .dropna(subset=[\"customer_id\",\"amount\"])\n",
+					"    .withColumn(\"event_date\",to_date(col(\"event_timestamp\")))\n",
+					"    .withColumn(\"payment_method\",lower(col(\"payment_method\")))\n",
+					"    .withColumn(\"amount\",col(\"amount\").cast(\"float\"))\n",
+					"\n",
+					"    .select(\"event_id\",\"customer_id\",\"event_date\",\n",
+					"    \"product_id\",\"product_category\",\"payment_method\",\"amount\",\"location\")\n",
+					"\n",
+					")\n",
+					"\n",
+					"df_silver.write.mode(\"overwrite\").parquet(\"abfss://retial@retailrb.dfs.core.windows.net/Silver\")\n",
+					""
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df_silver.show()"
+				],
+				"execution_count": 12
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Gold Layer - Aggregates\n",
+					"from pyspark.sql.functions import sum, count, col\n",
+					"\n",
+					"df_silver = spark.read.parquet(\"abfss://retial@retailrb.dfs.core.windows.net/Silver/\")\n",
+					"\n",
+					"df_silver.show()\n",
+					"\n",
+					"df_daily_revenue = (\n",
+					"    df_silver.groupBy(\"event_date\")\n",
+					"    .agg(sum(\"amount\").alias(\"daily_revenue\"), count(\"*\").alias(\"total_purchases\"))\n",
+					")\n",
+					"\n",
+					"df_daily_revenue.write.mode(\"overwrite\").parquet(\"abfss://retial@retailrb.dfs.core.windows.net/Gold/\")"
+				],
+				"execution_count": 14
+			}
+		]
+	}
+}
