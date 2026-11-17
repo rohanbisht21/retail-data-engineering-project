@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "797c3d6b-e2eb-4e96-bc10-b8f30e31197d"
+				"spark.autotune.trackingId": "5a144850-0be6-4850-831d-a2bb6889232c"
 			}
 		},
 		"metadata": {
@@ -92,7 +92,7 @@
 					"df_silver.write.mode(\"overwrite\").parquet(\"abfss://retial@retailrb.dfs.core.windows.net/Silver\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
