@@ -18,15 +18,16 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "152b1e53-aa70-4195-9a1e-075be8608d42"
+				"spark.autotune.trackingId": "797c3d6b-e2eb-4e96-bc10-b8f30e31197d"
 			}
 		},
 		"metadata": {
 			"saveOutput": true,
-			"synapse_widget": {
-				"version": "0.1"
-			},
 			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
 			"language_info": {
 				"name": "python"
 			},
@@ -37,14 +38,13 @@
 				"endpoint": "https://synapse-proj-rb-03.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pocaprkpool",
 				"auth": {
 					"type": "AAD",
-					"authResource": "https://dev.azuresynapse.net",
-					"authHeader": null
+					"authResource": "https://dev.azuresynapse.net"
 				},
 				"sparkVersion": "3.5",
 				"nodeCount": 3,
 				"cores": 4,
 				"memory": 28,
-				"extraHeader": null
+				"automaticScaleJobs": false
 			},
 			"sessionKeepAliveTimeout": 30
 		},
@@ -52,11 +52,25 @@
 			{
 				"cell_type": "code",
 				"source": [
+					"# Retail Data Engineering Project\n",
 					"from pyspark.sql.functions import col, to_date, lower\n",
 					"df_bronze = spark.read.parquet(\"abfss://retial@retailrb.dfs.core.windows.net/Bronze/manish040596/azure-data-engineer-projects/refs/heads/main/retail_transactions_bronze.parquet\")\n",
 					"df_bronze.show()"
 				],
-				"execution_count": 3
+				"execution_count": 1
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
 			},
 			{
 				"cell_type": "code",
@@ -78,7 +92,7 @@
 					"df_silver.write.mode(\"overwrite\").parquet(\"abfss://retial@retailrb.dfs.core.windows.net/Silver\")\n",
 					""
 				],
-				"execution_count": 13
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
